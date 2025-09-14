@@ -1,13 +1,74 @@
-import 'package:clickcount_app/features/counterApp_bloc/bloc/bloc/counter_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-class CounterAppBloc extends StatelessWidget {
-  const CounterAppBloc({super.key});
+class Home extends StatefulWidget {
+  const Home({super.key});
+
+  @override
+  State<Home> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<Home> {
+  int counter = 0;
+  Color setColor = Colors.white;
+  Color textColor = Colors.black;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+
+  void incrementCounter() {
+    setState(() {
+      counter++;
+      updateColors();
+    });
+  }
+
+  void decrementCounter() {
+  if (counter > 0) {
+    setState(() {
+      counter--;
+      updateColors();
+    });
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Counter is already zero!"),
+        duration: Duration(milliseconds: 100),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+}
+
+
+  void resetCounter() {
+    setState(() {
+      counter = 0;
+      setColor = Colors.white;
+      textColor = Colors.black;
+    });
+  }
+
+  void updateColors() {
+    if (counter == 0) {
+      setColor = Colors.white;
+      textColor = Colors.black;
+    } else if (counter > 0) {
+      setColor = const Color(0xFF0179DB);
+      textColor = Colors.white;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: isDark ? Colors.grey[900] : Colors.grey[200],
       body: SafeArea(
         child: Column(
           children: [
@@ -17,17 +78,17 @@ class CounterAppBloc extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 20),
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: isDark ? Colors.grey[850] : Colors.white,
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.shade300,
+                    color: isDark ? Colors.black54 : Colors.grey.shade300,
                     offset: const Offset(3, 3),
                     blurRadius: 6,
                     spreadRadius: 1,
                   ),
                   BoxShadow(
-                    color: Colors.grey.shade300,
+                    color: isDark ? Colors.black26 : Colors.white,
                     offset: const Offset(-2, -2),
                     blurRadius: 5,
                   ),
@@ -35,11 +96,11 @@ class CounterAppBloc extends StatelessWidget {
               ),
               child: RichText(
                 text: TextSpan(
-                  text: "Welcome to ",
+                  text: "Welcome to",
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black,
+                    color: isDark ? Colors.white : Colors.black,
                   ),
                   children: const [
                     TextSpan(
@@ -60,7 +121,7 @@ class CounterAppBloc extends StatelessWidget {
               height: 160,
               width: 160,
               decoration: BoxDecoration(
-                color: Colors.amber,
+                color: setColor,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
@@ -76,17 +137,13 @@ class CounterAppBloc extends StatelessWidget {
                 ],
               ),
               child: Center(
-                child: BlocBuilder<CounterBloc, CounterState>(
-                  builder: (context, state) {
-                    return Text(
-                      state.counterValue.toString(),
-                      style: TextStyle(
-                        fontSize: 60,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    );
-                  },
+                child: Text(
+                  '$counter',
+                  style: TextStyle(
+                    fontSize: 60,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
                 ),
               ),
             ),
@@ -97,23 +154,17 @@ class CounterAppBloc extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 FloatingActionButton(
-                  onPressed: () {
-                    BlocProvider.of<CounterBloc>(
-                      context,
-                    ).add(DecrementCountEvent());
-                  },
-                  backgroundColor: Colors.white,
+                  heroTag: 'decrement',
+                  onPressed: decrementCounter,
+                  backgroundColor: isDark ? Colors.grey[800] : Colors.white,
                   elevation: 10,
                   child: const Icon(Icons.remove, size: 30),
                 ),
                 const SizedBox(width: 30),
                 FloatingActionButton(
-                  onPressed: () {
-                    BlocProvider.of<CounterBloc>(
-                      context,
-                    ).add(IncrementCountEvent());
-                  },
-                  backgroundColor: Colors.white,
+                  heroTag: 'increment',
+                  onPressed: incrementCounter,
+                  backgroundColor: isDark ? Colors.grey[800] : Colors.white,
                   elevation: 10,
                   child: const Icon(Icons.add, size: 30),
                 ),
@@ -123,16 +174,11 @@ class CounterAppBloc extends StatelessWidget {
             const SizedBox(height: 30),
 
             TextButton(
-              onPressed: () {
-                BlocProvider.of<CounterBloc>(context).add(ResetCountEvent());
-              },
+              onPressed: resetCounter,
               style: TextButton.styleFrom(
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 10,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                 textStyle: const TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w600,
